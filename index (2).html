@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicTrust - Public Infrastructure Accountability</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-primary: #006a64;
+            --color-dark: #001d36;
+            --color-light: #f7f9ff;
+            --color-bg: #f7f9ff;
+            --color-text-dark: #001d36;
+            --color-text-muted: #43474d;
+            --color-text-light: #74777e;
+            --color-border: rgba(195, 198, 206, 0.3);
+            --color-white: #ffffff;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-2xl: 40px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: linear-gradient(90deg, rgb(247, 249, 255) 0%, rgb(255, 255, 255) 100%);
+            color: var(--color-text-dark);
+            line-height: 1.6;
+        }
+
+        /* ============ HEADER ============ */
+        header {
+            background: var(--color-white);
+            border-bottom: 1px solid var(--color-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .logo {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            text-decoration: none;
+            color: var(--color-text-dark);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--color-dark);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .logo-text h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .logo-text p {
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-muted);
+            margin: 0;
+        }
+
+        .nav {
+            display: flex;
+            gap: var(--spacing-lg);
+        }
+
+        .nav a {
+            color: var(--color-text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: var(--color-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .btn-login {
+            background: transparent;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--color-text-dark);
+            transition: background 0.3s;
+        }
+
+        .btn-login:hover {
+            background: rgba(0, 106, 100, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #005450;
+        }
+
+        /* ============ HERO SECTION ============ */
+        .hero {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+            display: grid;
+            grid-template-columns: 7fr 5fr;
+            gap: var(--spacing-xl);
+            align-items: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -128px;
+            left: 8.48%;
+            right: 8.48%;
+            height: 384px;
+            background: radial-gradient(circle, rgba(142, 241, 232, 0.2) 0%, rgba(142, 241, 232, 0) 100%);
+            filter: blur(64px);
+            pointer-events: none;
+        }
+
+        .hero-left {
+            position: relative;
+            z-index: 2;
+        }
+
+        .badge {
+            display: inline-flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+            background: rgba(0, 106, 100, 0.1);
+            border: 1px solid rgba(0, 106, 100, 0.2);
+            padding: 5px 13px;
+            border-radius: 9999px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--color-primary);
+            border-radius: 50%;
+        }
+
+        .badge-text {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.55px;
+            color: var(--color-primary);
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-dark);
+        }
+
+        h1 .highlight {
+            color: var(--color-primary);
+        }
+
+        .hero-description {
+            font-size: 16px;
+            color: var(--color-text-light);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .hero-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .hero-btn.primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .hero-btn.primary:hover {
+            background: #005450;
+        }
+
+        .hero-btn.secondary {
+            background: transparent;
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .hero-btn.secondary:hover {
+            background: rgba(0, 106, 100, 0.1);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: var(--spacing-xl);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .stat-item h3 {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--color-text-dark);
+            margin-bottom: 4px;
+        }
+
+        .stat-item p {
+            font-size: 12px;
+            color: var(--color-text-light);
+        }
+
+        .hero-right {
+            position: relative;
+        }
+
+        .form-card {
+            background: var(--color-white);
+            border-radius: 12px;
+            padding: var(--spacing-xl);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-card h3 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-dark);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--color-text-dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 106, 100, 0.1);
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: var(--spacing-md);
+        }
+
+        .form-submit:hover {
+            background: #005450;
+        }
+
+        .form-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: var(--spacing-md);
+            font-size: 14px;
+            display: none;
+        }
+
+        .form-message.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            display: block;
+        }
+
+        .form-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: block;
+        }
+
+        /* ============ MAP SECTION ============ */
+        .section {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--color-text-dark);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .section-description {
+            font-size: 16px;
+            color: var(--color-text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .map-legend {
+            background: var(--color-white);
+            padding: var(--spacing-lg);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .map-legend h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-dark);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--color-text-muted);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        /* ============ ROLES SECTION ============ */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-2xl);
+        }
+
+        .role-card {
+            background: var(--color-white);
+            padding: var(--spacing-xl);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .role-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .role-icon {
+            font-size: 40px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .role-card h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-dark);
+        }
+
+        .role-card p {
+            font-size: 14px;
+            color: var(--color-text-light);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.6;
+        }
+
+        .role-btn {
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .role-btn.primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .role-btn.primary:hover {
+            background: #005450;
+        }
+
+        .role-btn.secondary {
+            background: rgba(0, 106, 100, 0.1);
+            color: var(--color-primary);
+            border: 1px solid rgba(0, 106, 100, 0.2);
+        }
+
+        .role-btn.secondary:hover {
+            background: rgba(0, 106, 100, 0.2);
+        }
+
+        /* ============ TRANSPARENCY SECTION ============ */
+        .transparency-section {
+            background: linear-gradient(135deg, rgba(0, 106, 100, 0.05) 0%, rgba(142, 241, 232, 0.05) 100%);
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+        }
+
+        .transparency-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-2xl);
+        }
+
+        .transparency-item {
+            background: var(--color-white);
+            padding: var(--spacing-lg);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .transparency-icon {
+            font-size: 32px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .transparency-item h4 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--color-text-dark);
+        }
+
+        .transparency-item p {
+            font-size: 14px;
+            color: var(--color-text-light);
+            line-height: 1.6;
+        }
+
+        /* ============ CTA SECTION ============ */
+        .cta-section {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #00897b 100%);
+            color: white;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+            text-align: center;
+        }
+
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .cta-section p {
+            font-size: 16px;
+            margin-bottom: var(--spacing-lg);
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        .cta-buttons-group {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-cta {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-cta.primary {
+            background: white;
+            color: var(--color-primary);
+        }
+
+        .btn-cta.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-cta.secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-cta.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ============ FOOTER ============ */
+        footer {
+            background: var(--color-dark);
+            color: rgba(255, 255, 255, 0.7);
+            padding: var(--spacing-2xl) var(--spacing-xl);
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .footer-brand {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .footer-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--color-primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .footer-brand h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .footer-brand p {
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .footer-disclaimer {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: var(--spacing-md);
+        }
+
+        .footer-column h4 {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            #map {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="header-container">
+            <a href="#" class="logo">
+                <div class="logo-icon">C</div>
+                <div class="logo-text">
+                    <h1>CivicTrust</h1>
+                    <p>Infrastructure Accountability</p>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="#map-section">Map</a>
+                <a href="#roles">Roles</a>
+                <a href="#transparency">Transparency</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <div class="header-actions">
+                <button class="btn-login">Sign In</button>
+                <button class="btn-primary">Get Started</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-left">
+            <div class="badge">
+                <div class="badge-dot"></div>
+                <span class="badge-text">Now Live in Chennai</span>
+            </div>
+            <h1>Report Infrastructure <span class="highlight">Issues. Track Action. Build Trust.</span></h1>
+            <p class="hero-description">
+                CivicTrust empowers citizens to report hazardous public infrastructure, enables municipal engineers to coordinate repairs transparently, and allows CSR sponsors to fund verified community improvements—all within one auditable ledger.
+            </p>
+            <div class="hero-buttons">
+                <button class="hero-btn primary">📍 Report an Issue</button>
+                <button class="hero-btn secondary">View Live Map</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <h3>2,847</h3>
+                    <p>Issues Reported</p>
+                </div>
+                <div class="stat-item">
+                    <h3>1,923</h3>
+                    <p>Repairs Completed</p>
+                </div>
+                <div class="stat-item">
+                    <h3>₹4.2 Cr</h3>
+                    <p>Funds Disbursed</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="form-card">
+                <h3>📝 Quick Report</h3>
+                <form id="reportForm" onsubmit="submitReport(event)">
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" name="name" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210" required>
+                    </div>
+                    <button type="submit" class="form-submit">Submit Report</button>
+                    <div id="formMessage" class="form-message"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAP SECTION -->
+    <section class="section" id="map-section">
+        <div class="section-header">
+            <div class="section-label">Live Issue Tracking</div>
+            <h2 class="section-title">Every Issue on the Map.</h2>
+            <p class="section-description">Real-time visualization of reported infrastructure hazards and their resolution status across Chennai.</p>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="map-legend">
+            <h4>Issue Status Legend</h4>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ef4444;"></div>
+                    <span>Critical - Immediate Action Needed</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f59e0b;"></div>
+                    <span>Moderate - Under Review</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #22c55e;"></div>
+                    <span>Verified - Repair in Progress</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3b82f6;"></div>
+                    <span>Completed - Verified Fixed</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROLES SECTION -->
+    <section class="section" id="roles">
+        <div class="section-header">
+            <div class="section-label">Collaborative Civic Architecture</div>
+            <h2 class="section-title">Everyone Has a Role in Building Better Communities.</h2>
+            <p class="section-description">Tailored interfaces engineered for citizens, municipal engineers, and corporate infrastructure sponsors.</p>
+        </div>
+
+        <div class="roles-grid">
+            <div class="role-card">
+                <div class="role-icon">👤</div>
+                <h3>For Citizens</h3>
+                <p>Report local issues, follow status updates, upload completion confirmations, and keep public infrastructure expenditures accountable.</p>
+                <button class="role-btn secondary">Report an Issue</button>
+            </div>
+            <div class="role-card">
+                <div class="role-icon">🏛️</div>
+                <h3>For Government Authorities</h3>
+                <p>Review filed citizen reports, coordinate regional contractor repairs, disburse project milestones, and publish auditable updates.</p>
+                <button class="role-btn primary">Authority Login</button>
+            </div>
+            <div class="role-card">
+                <div class="role-icon">💼</div>
+                <h3>For Industry Sponsors</h3>
+                <p>Discover eligible CSR infrastructure projects, record audited sponsorship commitments, and review verified public accounts.</p>
+                <button class="role-btn secondary">Sponsor Login</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- TRANSPARENCY SECTION -->
+    <section class="transparency-section" id="transparency">
+        <div class="section-header">
+            <div class="section-label">Constitutional Values</div>
+            <h2 class="section-title">Transparency Should Be Part of Every Public Project.</h2>
+            <p class="section-description">Non-partisan safeguards designed to establish lasting trust between taxpayers and municipal works.</p>
+        </div>
+
+        <div class="transparency-items">
+            <div class="transparency-item">
+                <div class="transparency-icon">✓</div>
+                <h4>Visible Status History</h4>
+                <p>Every status shift from intake to signoff is permanently timestamped and open to public inspection.</p>
+            </div>
+            <div class="transparency-item">
+                <div class="transparency-icon">💰</div>
+                <h4>Documented Funding Records</h4>
+                <p>Every allocated rupee is tied to vendor milestone invoices, material costs, and inspection sign-offs.</p>
+            </div>
+            <div class="transparency-item">
+                <div class="transparency-icon">📷</div>
+                <h4>Repair Completion Evidence</h4>
+                <p>High-resolution geo-verified before-and-after photographs verified by nearby community members.</p>
+            </div>
+            <div class="transparency-item">
+                <div class="transparency-icon">🤖</div>
+                <h4>Reviewable AI Prioritization</h4>
+                <p>Automated hazard assessments provide transparent criteria instead of subjective administrative triage.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <div class="badge" style="background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.3);">
+                <div class="badge-text" style="color: white;">Civic Participation in Action</div>
+            </div>
+            <h2>Better Communities Begin With Visible Action.</h2>
+            <p>One report can start a change. One transparent process can build lasting trust. Submit a hazardous infrastructure notice in less than two minutes.</p>
+            <div class="cta-buttons-group">
+                <button class="btn-cta primary">📍 Report an Issue</button>
+                <button class="btn-cta secondary">Explore CivicTrust</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-brand">
+                        <div class="footer-logo">C</div>
+                        <div>
+                            <h3>CivicTrust</h3>
+                            <p>Report Problems. Track Action. Build Trust. An authoritative, non-partisan civic-tech infrastructure monitoring and capital allocation oversight platform.</p>
+                            <div class="footer-disclaimer">
+                                Disclaimer: CivicTrust is a prototype demonstrating public infrastructure reporting and funding transparency. All records presented for college demonstration purposes.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4>Public Ledger</h4>
+                    <ul>
+                        <li><a href="#">Methodology</a></li>
+                        <li><a href="#">Audit Logs</a></li>
+                        <li><a href="#">Public Ledger</a></li>
+                        <li><a href="#">Whistleblower Protection</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Oversight & Terms</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Oversight</a></li>
+                        <li><a href="#">Municipal API Gateway</a></li>
+                        <li><a href="#">Security Disclosures</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>© 2025 CivicTrust Portal. All civic allocation records are cryptographically verified for public auditability.</div>
+                <div class="footer-status">
+                    <div class="status-dot"></div>
+                    <span>Ledger Status: Operational</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        // Initialize Leaflet Map
+        const map = L.map('map').setView([13.0827, 80.2707], 12);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Sample issue markers
+        const issues = [
+            { lat: 13.0827, lng: 80.2707, title: 'Road Damage', status: 'Repair in Progress', severity: 'critical' },
+            { lat: 13.0645, lng: 80.2661, title: 'Broken Streetlight', status: 'Under Review', severity: 'moderate' },
+            { lat: 13.0945, lng: 80.2740, title: 'Water Leakage', status: 'Verified', severity: 'verified' },
+            { lat: 13.0750, lng: 80.2800, title: 'Pothole', status: 'Completed', severity: 'completed' }
+        ];
+
+        const severityColors = {
+            critical: '#ef4444',
+            moderate: '#f59e0b',
+            verified: '#22c55e',
+            completed: '#3b82f6'
+        };
+
+        issues.forEach(issue => {
+            const marker = L.circleMarker([issue.lat, issue.lng], {
+                radius: 8,
+                fillColor: severityColors[issue.severity],
+                color: '#fff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            marker.bindPopup(`<b>${issue.title}</b><br><small>${issue.status}</small>`);
+        });
+
+        // Form submission
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwugK3vlwTS6xfgFSGz9mDhSxTN1liobX2VrGFG0dJYlN2EW-wKEJkvGgRctW9YWw1h5g/exec';
+
+        function submitReport(event) {
+            event.preventDefault();
+
+            const form = document.getElementById('reportForm');
+            const name = form.elements['name'].value.trim();
+            const email = form.elements['email'].value.trim();
+            const phone = form.elements['phone'].value.trim();
+            const messageDiv = document.getElementById('formMessage');
+
+            if (!name || !email || !phone) {
+                messageDiv.textContent = '✗ Please fill in all fields';
+                messageDiv.classList.remove('success');
+                messageDiv.classList.add('error');
+                return;
+            }
+
+            // Build URL with query parameters
+            const url = APPS_SCRIPT_URL + '?' + new URLSearchParams({
+                name: name,
+                email: email,
+                phone: phone
+            }).toString();
+
+            // Fetch with GET method, no-cors mode (works locally)
+            fetch(url, {
+                method: 'GET',
+                mode: 'no-cors'
+            })
+            .then(() => {
+                messageDiv.textContent = '✓ Report submitted successfully!';
+                messageDiv.classList.remove('error');
+                messageDiv.classList.add('success');
+                form.reset();
+                setTimeout(() => {
+                    messageDiv.classList.remove('success');
+                }, 5000);
+            })
+            .catch((err) => {
+                messageDiv.textContent = '✗ Error submitting report. Please try again.';
+                messageDiv.classList.remove('success');
+                messageDiv.classList.add('error');
+                console.error('Fetch error:', err);
+            });
+        }
+    </script>
+</body>
+</html>
